@@ -6,7 +6,7 @@
 /*   By: hhammouc <hhammouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:14:55 by hhammouc          #+#    #+#             */
-/*   Updated: 2025/02/21 11:36:13 by hhammouc         ###   ########.fr       */
+/*   Updated: 2025/02/24 14:03:18 by hhammouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,22 @@ void	handler(int pid, char c)
 	unsigned char	temp;
 	int				i;
 
-	i = 0;
+	i = 8;
 	temp = c;
-	while (i < 8)
+	while (i > 0)
 	{
-		if (temp << i & 128)
-			kill(pid, SIGUSR1);
+		i--;
+		if (temp >> i & 1)
+		{
+			if (kill(pid, SIGUSR1) == -1)
+				exit(1);
+		}
 		else
-			kill(pid, SIGUSR2);
-		i++;
-		usleep(300);
+		{
+			if (kill(pid, SIGUSR2) == -1)
+				exit(1);
+		}
+		usleep(600);
 	}
 }
 
@@ -47,7 +53,7 @@ int	_check_pid_(char *pid)
 int	main(int argc, char **argv)
 {
 	int	pid;
-	int		i;
+	int	i;
 
 	i = 0;
 	if (argc != 3)
@@ -61,7 +67,7 @@ int	main(int argc, char **argv)
 		valid_pid_error(pid);
 		return (1);
 	}
-	while(argv[2][i])
+	while (argv[2][i])
 	{
 		handler(pid, argv[2][i]);
 		i++;

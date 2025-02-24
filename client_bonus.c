@@ -1,32 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.c                                           :+:      :+:    :+:   */
+/*   client_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hhammouc <hhammouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/13 21:14:55 by hhammouc          #+#    #+#             */
-/*   Updated: 2025/02/21 11:36:13 by hhammouc         ###   ########.fr       */
+/*   Created: 2025/02/19 21:14:55 by hhammouc          #+#    #+#             */
+/*   Updated: 2025/02/24 15:06:59 by hhammouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void	handler(int pid, char c)
+void	handler_bonus(int pid, char c)
 {
 	unsigned char	temp;
 	int				i;
 
-	i = 0;
 	temp = c;
-	while (i < 8)
+	i = 8;
+	while (i > 0)
 	{
-		if (temp << i & 128)
-			kill(pid, SIGUSR1);
+		i--;
+		if (temp >> i & 1)
+		{
+			if (kill(pid, SIGUSR1) == -1)
+				exit(1);
+		}
 		else
-			kill(pid, SIGUSR2);
-		i++;
-		usleep(300);
+		{
+			if (kill(pid, SIGUSR2) == -1)
+				exit(1);
+		}
+		usleep(800);
 	}
 }
 
@@ -44,10 +50,18 @@ int	_check_pid_(char *pid)
 	return (0);
 }
 
+void	received_message(int sig)
+{
+	(void)sig;
+	ft_putstr("\033[1;32mThe message was received\033[0m\n");
+	exit(0);
+}
+
 int	main(int argc, char **argv)
 {
-	int	pid;
-	int		i;
+	int					pid;
+	int					i;
+	struct sigaction	sa;
 
 	i = 0;
 	if (argc != 3)
@@ -61,10 +75,12 @@ int	main(int argc, char **argv)
 		valid_pid_error(pid);
 		return (1);
 	}
-	while(argv[2][i])
-	{
-		handler(pid, argv[2][i]);
-		i++;
-	}
+	sa.sa_handler = &received_message;
+	sigaction(SIGUSR2, &sa, NULL);
+	while (argv[2][i])
+		handler_bonus(pid, argv[2][i++]);
+	handler_bonus (pid, '\0');
+	while (1)
+		pause();
 	return (0);
 }

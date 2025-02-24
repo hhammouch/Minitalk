@@ -1,32 +1,42 @@
+CC = cc -Wall -Werror -Wextra
 
+GREEN 	= \033[1;32m
+RED		= \033[1;31m
+YELLOW	= \033[1;33m
+BLUE	= \033[1;34m
+RC		= \033[0m
 
+NAME_CLIENT = client
+NAME_SERVER = server
+BONUS_CLIENT = client_bonus
+BONUS_SERVER = server_bonus
 
-SRC-UTILIS = /utilis/ft_putnbr.c /utilis/ft_putstr.c /utilis/ft_errors.c \
-      /utilis/ft_atoi.c
+all: $(NAME_CLIENT) $(NAME_SERVER)
 
-SRC-CLIENT =	client.c
-SRC-SERVER =	server.c
+$(NAME_CLIENT): client.c
+	@$(CC) client.c utils.c -o $(NAME_CLIENT)
+	@echo "$(GREEN)Client built successfully!✨$(RC)"
 
+$(NAME_SERVER): server.c
+	@$(CC) server.c utils.c -o $(NAME_SERVER)
+	@echo "$(BLUE)Server built successfully!✨$(RC)"
 
-CC = CC -Wall -Werror -Wextra
+bonus: $(BONUS_SERVER) $(BONUS_CLIENT)
 
-NAME-CLIENT	=	client
-NAME-SERVER	=	server
+$(BONUS_CLIENT): client_bonus.c
+	@$(CC) client_bonus.c utils.c -o $(BONUS_CLIENT)
+	@echo "$(GREEN)Client built successfully!✨$(RC)"
 
+$(BONUS_SERVER): server.c
+	@$(CC) server_bonus.c utils.c -o $(BONUS_SERVER)
+	@echo "$(BLUE)Server built successfully!✨$(RC)"
 
+clean:
+	@rm -f $(NAME_CLIENT) $(NAME_SERVER) $(BONUS_SERVER) $(BONUS_CLIENT)
+	@echo "$(YELLOW)Cleaned up!✨$(RC)"
+fclean: clean
+	@echo "$(RED)All files removed!🗑️$(RC)"
 
+re: fclean all
 
-
-all: $(NAME-CLIENT) $(NAME-SERVER)
-
-
-$(NAME-CLIENT): $(SRC-CLIENT) $(SRC-UTILIS)
-				$(CC) $(SRC-CLIENT) $(SRC-UTILIS) -o $(NAME-CLIENT)
-				@echo "Server program was created"
-
-$(NAME-SERVER): $(SRC-SERVER) $(SRC-UTILIS)
-				$(CC) $(SRC-SERVER) $(SRC-UTILIS) -o $(NAME-SERVER)
-				@echo "(GREEN)Client bonus program was created"
-
-
-
+.PHONY: clean
