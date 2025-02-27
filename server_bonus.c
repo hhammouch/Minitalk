@@ -6,11 +6,21 @@
 /*   By: hhammouc <hhammouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/19 21:09:55 by hhammouc          #+#    #+#             */
-/*   Updated: 2025/02/27 12:28:56 by hhammouc         ###   ########.fr       */
+/*   Updated: 2025/02/27 15:48:35 by hhammouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
+
+void	take_action(char *c, int *bit, int *pid)
+{
+	if (*c == '\0')
+		kill(*pid, SIGUSR2);
+	else
+		ft_putstr(c);
+	*c = 0;
+	*bit = 0;
+}
 
 void	handle_bonus(int sig, siginfo_t *info, void *context)
 {
@@ -35,14 +45,9 @@ void	handle_bonus(int sig, siginfo_t *info, void *context)
 	bit++;
 	if (bit == 8)
 	{
-		if (c == '\0')
-			kill(client_pid, SIGUSR2);
-		else
-			write(1, &c, 1);
-		bit = 0;
-		c = 0;
+		take_action(&c, &bit, &client_pid);
 	}
-	usleep(500);
+	usleep(5);
 	kill(client_pid, SIGUSR1);
 }
 

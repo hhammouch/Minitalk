@@ -6,11 +6,18 @@
 /*   By: hhammouc <hhammouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:09:55 by hhammouc          #+#    #+#             */
-/*   Updated: 2025/02/27 12:26:29 by hhammouc         ###   ########.fr       */
+/*   Updated: 2025/02/27 15:25:18 by hhammouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
+
+void	take_action(char *c, int *bit)
+{
+	ft_putstr(c);
+	*c = 0;
+	*bit = 0;
+}
 
 void	handle_signals(int sig, siginfo_t *info, void *context)
 {
@@ -34,12 +41,8 @@ void	handle_signals(int sig, siginfo_t *info, void *context)
 		c += 1;
 	bit++;
 	if (bit == 8)
-	{
-		write(1, &c, 1);
-		c = 0;
-		bit = 0;
-	}
-	usleep(500);
+		take_action(&c, &bit);
+	usleep(10);
 	kill(client_pid, SIGUSR1);
 }
 
@@ -58,6 +61,5 @@ int	main(void)
 		sigaction(SIGUSR2, &sa, 0);
 		pause();
 	}
-		
 	return (0);
 }

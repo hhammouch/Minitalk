@@ -14,21 +14,21 @@ BONUS_SERVER = server_bonus
 all: $(NAME_CLIENT) $(NAME_SERVER)
 
 $(NAME_CLIENT): client.c
-	@$(CC) client.c utils.c -o $(NAME_CLIENT)
+	@$(CC) client.c utils.c errors.c -o $(NAME_CLIENT)
 	@echo "$(GREEN)Client built successfully!✨$(RC)"
 
 $(NAME_SERVER): server.c
-	@$(CC) server.c utils.c -o $(NAME_SERVER)
+	@$(CC) server.c utils.c errors.c -o $(NAME_SERVER)
 	@echo "$(BLUE)Server built successfully!✨$(RC)"
 
 bonus: $(BONUS_SERVER) $(BONUS_CLIENT)
 
 $(BONUS_CLIENT): client_bonus.c
-	@$(CC) client_bonus.c utils.c -o $(BONUS_CLIENT)
+	@$(CC) client_bonus.c utils.c errors.c -o $(BONUS_CLIENT)
 	@echo "$(GREEN)Client built successfully!✨$(RC)"
 
 $(BONUS_SERVER): server.c
-	@$(CC) server_bonus.c utils.c -o $(BONUS_SERVER)
+	@$(CC) server_bonus.c utils.c errors.c -o $(BONUS_SERVER)
 	@echo "$(BLUE)Server built successfully!✨$(RC)"
 
 clean:

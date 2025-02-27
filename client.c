@@ -6,23 +6,23 @@
 /*   By: hhammouc <hhammouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:14:55 by hhammouc          #+#    #+#             */
-/*   Updated: 2025/02/27 12:26:13 by hhammouc         ###   ########.fr       */
+/*   Updated: 2025/02/27 15:22:15 by hhammouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void recieved(int sig, siginfo_t *info, void *context)
+static int	g_ack_received = 0;
+
+static void	recieved(int sig, siginfo_t *info, void *context)
 {
 	(void)info;
 	(void)context;
-	static int	sent;
-
-	if (sig == SIGUSR2)
-		++sent;
+	if (sig == SIGUSR1)
+		g_ack_received = 1;
 }
 
-void	handler(int pid, char c)
+static void	handler(int pid, char c)
 {
 	unsigned char	temp;
 	int				i;
@@ -32,6 +32,7 @@ void	handler(int pid, char c)
 	while (i > 0)
 	{
 		i--;
+		g_ack_received = 0;
 		if (temp >> i & 1)
 		{
 			if (kill(pid, SIGUSR1) == -1)
@@ -42,23 +43,10 @@ void	handler(int pid, char c)
 			if (kill(pid, SIGUSR2) == -1)
 				exit(1);
 		}
-		pause();
-		usleep(500);
+		while (!g_ack_received)
+			pause();
+		usleep(5);
 	}
-}
-
-int	_check_pid_(char *pid)
-{
-	int	i;
-
-	i = 0;
-	while (pid[i])
-	{
-		if (pid[i] < '0' || pid[i] > '9')
-			return (1);
-		i++;
-	}
-	return (0);
 }
 
 void	sent_msg(char *str, int pid)
@@ -68,12 +56,11 @@ void	sent_msg(char *str, int pid)
 	i = 0;
 	while (str[i])
 		handler(pid, str[i++]);
-	handler(pid, '\0');
 }
 
 int	main(int argc, char **argv)
 {
-	int	pid;
+	int					pid;
 	struct sigaction	sa;
 
 	if (argc != 3)
@@ -91,6 +78,6 @@ int	main(int argc, char **argv)
 		valid_pid_error(pid);
 		return (1);
 	}
-	sent_msg(argv[2],pid);
+	sent_msg(argv[2], pid);
 	return (0);
 }
