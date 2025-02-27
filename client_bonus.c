@@ -6,11 +6,30 @@
 /*   By: hhammouc <hhammouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/19 21:14:55 by hhammouc          #+#    #+#             */
-/*   Updated: 2025/02/24 15:06:59 by hhammouc         ###   ########.fr       */
+/*   Updated: 2025/02/27 12:33:36 by hhammouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
+
+void	received_message(int sig)
+{
+	(void)sig;
+	ft_putstr("\033[1;32mThe message was received\033[0m\n");
+	exit(0);
+}
+
+void recieved_bonus(int sig, siginfo_t *info, void *context)
+{
+	(void)info;
+	(void)context;
+	static int	sent;
+
+	if (sig == SIGUSR2)
+		received_message(sig);
+	else if (sig == SIGUSR1)
+		++sent;
+}
 
 void	handler_bonus(int pid, char c)
 {
@@ -32,7 +51,8 @@ void	handler_bonus(int pid, char c)
 			if (kill(pid, SIGUSR2) == -1)
 				exit(1);
 		}
-		usleep(800);
+		pause();
+		usleep(500);
 	}
 }
 
@@ -50,11 +70,14 @@ int	_check_pid_(char *pid)
 	return (0);
 }
 
-void	received_message(int sig)
+void	sent_msg(char *str, int pid)
 {
-	(void)sig;
-	ft_putstr("\033[1;32mThe message was received\033[0m\n");
-	exit(0);
+	int	i;
+
+	i = 0;
+	while (str[i])
+		handler_bonus(pid, str[i++]);
+	handler_bonus(pid, '\0');
 }
 
 int	main(int argc, char **argv)
@@ -75,12 +98,11 @@ int	main(int argc, char **argv)
 		valid_pid_error(pid);
 		return (1);
 	}
-	sa.sa_handler = &received_message;
+	sa.sa_sigaction = &recieved_bonus;
+	sa.sa_flags = SA_SIGINFO | SA_RESTART;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
-	while (argv[2][i])
-		handler_bonus(pid, argv[2][i++]);
-	handler_bonus (pid, '\0');
-	while (1)
-		pause();
+	sent_msg(argv[2],pid);
 	return (0);
 }
